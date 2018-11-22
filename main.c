@@ -5,19 +5,32 @@ int main(void)
 {
     /* Currently the alphabet is hard coded */
     cchar alphabet[] = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
-    cuint size = strlen(alphabet);
+    cuint aSize = strlen(alphabet);
     
     /* The multi dimensional array to store the tableau */
-    char tab[size][size];
+    char tab[aSize][aSize];
 
     /* Testing populate tableau with chars */
-    _Bool ret = populateTableau(size, tab, alphabet);
+    _Bool ret = populateTableau(aSize, tab, alphabet);
 
     if(ret){
-        printTableau(size, tab, (uint)alphabet[0]);
+        printTableau(aSize, tab, (uint)alphabet[0]);
     }else{
         return EXIT_FAILURE;
     }
+
+    /* Test excoding */
+    char clearText[] = "DONTWORRYBEHAPPY";
+    char key[] = "CHECKIO";
+    //char clearText[] = "ATTACKATDAWN";
+    //char key[] = "LEMONLEMONLE";
+    
+    cuint sz = strlen(clearText);
+    char cipherText[sz];
+
+    returnCipherText(key, clearText, cipherText, aSize, tab);
+
+    printf("Message '%s', encrypted with key '%s' had value: '%s'\n", clearText, key, cipherText);
 
     return EXIT_SUCCESS;
 }
