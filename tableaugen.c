@@ -56,5 +56,7 @@ void returnCipherText(cchar *key, cchar *clearText, char *cipherText, cuint aSiz
         if(i > lenC)
             i = 0;
     }
+
+    cipherText[j] = '\0';
 }
 
