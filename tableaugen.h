@@ -13,8 +13,13 @@ _Bool populateTableau(cuint size, char (*tab)[size], cchar *alphabet);
  * */
 void printTableau(cuint size, char (*tab)[size], uint offset);
 
-/* Encodes clearText with key using tableau
+/* Encodes clear text with key using tableau
  * Returns void
  * */
 void returnCipherText(cchar *key, cchar *clearText, char *cipherText, cuint aSize, char (*tab)[aSize]);
+
+/* Decodes cipher text using a known key
+ * Returns void
+ * */
+void returnClearText(cchar *key, cchar *clearText, char *cipherText, cuint aSize, char (*tab)[aSize], cuint offset);
 #endif

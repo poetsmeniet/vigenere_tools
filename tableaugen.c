@@ -59,3 +59,33 @@ void returnCipherText(cchar *key, cchar *clearText, char *cipherText, cuint aSiz
     cipherText[lenT] = '\0';
 }
 
+void returnClearText(cchar *key, char *clearText, char *cipherText, cuint aSize, char (*tab)[aSize], cuint offset)
+{
+    uint j;
+    uint i = 0;
+    cuint lenT = strlen(cipherText);
+    cuint lenKey= strlen(key);
+
+    for(j = 0; j < lenT; j++){
+        cuint keyChar = (uint)key[i];
+        cuint ctChar = (uint)cipherText[j];
+
+        /* Do the table lookup for decoding */
+        int nextRow;
+        for(nextRow = offset; nextRow < ( aSize + offset ); nextRow++){
+            if(tab[keyChar][nextRow] == ctChar){
+                /* Assign encrypted letter to clearText */
+                clearText[j] = tab[offset][nextRow];
+
+                break;
+            }
+        }
+
+        i++;
+
+        if(i >= lenKey)
+            i = 0;
+    }
+
+    clearText[lenT] = '\0';
+}
