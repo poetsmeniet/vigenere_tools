@@ -25,11 +25,11 @@ void printTableau(cuint size, char (*tab)[size], uint offset)
     uint i;
     uint j;
 
-    printf("Printing the tableau..\n");
+    printf("Printing the tableau.. size: %d, offset: %d\n", size, offset);
 
     for (j = offset; j < (size + offset); j++){
         for(i = offset; i < (size + offset); i++){
-            printf("%c ", tab[j][i]);
+            printf("%c", tab[j][i]);
         }
 
         printf("\n");
@@ -42,7 +42,7 @@ void returnCipherText(cchar *key, cchar *clearText, char *cipherText, cuint aSiz
     uint j;
     uint i = 0;
     cuint lenT = strlen(clearText);
-    cuint lenC = strlen(cipherText);
+    cuint lenKey= strlen(key);
 
     for(j = 0; j < lenT; j++){
         cuint keyChar = (uint)key[i];
@@ -53,10 +53,9 @@ void returnCipherText(cchar *key, cchar *clearText, char *cipherText, cuint aSiz
         
         i++;
 
-        if(i > lenC)
+        if(i >= lenKey)
             i = 0;
     }
-
-    cipherText[j] = '\0';
+    cipherText[lenT] = '\0';
 }
 
