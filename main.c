@@ -23,17 +23,21 @@ int main(void)
     }
 
     /* Test excoding */
-    //char clearText[] = "DONTWORRYBEHAPPY";
-    //char key[] = "CHECKIO";
-    char clearText[] = "ATTACKATDAWN";
-    char key[] = "LEMONLEMONLE";
+    char clearText[] = "DONTWORRYBEHAPPY"; //FVRVGWFTFFGRIDRF
+    char key[] = "CHECKIO";
+    //char clearText[] = "ATTACKATDAWN"; //LXFOPVEFRNHR
+    //char key[] = "LEMON";
+    //char clearText[] = "MICHIGANTECHNOLOGICALUNIVERSITY"; //TWWNPZOAASWNUHZBNWWGSNBVCSLYPMM
+    //char key[] = "HOUGHTON";
+    //char clearText[] = "WHATFOOLSTHESEMORTALSBE"; //LBCDUIQVHNJOHYOYGNCVHVG
+    //char key[] ="PUCK"; 
     
     cuint sz = strlen(clearText);
     char cipherText[sz];
 
     returnCipherText(key, clearText, cipherText, aSize, tab);
 
-    printf("Message '%s', encrypted with key '%s' had value: '%s'\n", clearText, key, cipherText);
+    printf("Message '%s', encrypted with key '%s' has value: '%s'\n", clearText, key, cipherText);
 
     return EXIT_SUCCESS;
 }
