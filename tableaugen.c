@@ -25,7 +25,7 @@ void printTableau(cuint size, char (*tab)[size], uint offset)
     uint i;
     uint j;
 
-    printf("Printing the tableau.. size: %d, offset: %d\n", size, offset);
+    printf("Printing the tableau.. size of alphabet: %d, offset: %d\n", size, offset);
 
     for (j = offset; j < (size + offset); j++){
         for(i = offset; i < (size + offset); i++){
