@@ -1,7 +1,7 @@
 #include "main.h"
 #include "tableaugen.h"
 
-int main(void)
+int main(int argc, char **argv)
 {
     /* Currently the alphabet is hard coded */
     /* Fuller ascii charset: 
@@ -16,8 +16,12 @@ int main(void)
      * */
     cuint offset = (uint)alphabet[0];
     
-    /* The multi dimensional array to store the tableau */
-    char tab[aSize * 2][aSize * 2];
+    /* The multi dimensional array to store the tableau 
+     * Note: the size of the array is doubled to be able
+     * to store using ascii offset index use
+     * */
+    cuint dim = aSize * 2;
+    char tab[dim][dim];
 
     /* Testing populate tableau with chars */
     _Bool ret = populateTableau(aSize, tab, alphabet);
@@ -25,6 +29,7 @@ int main(void)
     /* Printing the tableau */
     if(ret){
         printTableau(aSize, tab, offset);
+        printf("\n");
     }else{
         return EXIT_FAILURE;
     }
@@ -38,6 +43,8 @@ int main(void)
     //char key[] = "HOUGHTON";
     char clearText[] = "WHATFOOLSTHESEMORTALSBE"; //LBCDUIQVHNJOHYOYGNCVHVG
     char key[] ="PUCK"; 
+    //char clearText[] = "My name is Thomas, Thomas is my name"; //LBCDUIQVHNJOHYOYGNCVHVG
+    //char key[] ="tjap";
     
     /* Encoding function */
     cuint sz = strlen(clearText);
