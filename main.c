@@ -1,7 +1,7 @@
 #include <getopt.h> /* getopt_long */
+#include "generic.h"
 #include "main.h" 
 #include "tableaugen.h"
-#include "generic.h"
 
 /* A couple of encoding examples found on the internets: 
  * 

@@ -1,61 +1,7 @@
 #include <stdio.h>
 #include <string.h>
-#include "main.h"
+#include "generic.h"
 
-/* Stores numbers and their occurences */
-typedef struct numberFrequencies{
-    uint number;
-    uint cnt;
-    struct numberFrequencies *next;
-}numFreqs;
-
-/* Push numbers into struct */
-void pushNums(uint *numbers, uint sz, numFreqs *freqNums)
-{
-    uint i;
-    uint maxFactor = 20;
-
-    for(i = 0; i < sz; i++){
-        uint incr = 0;
-
-        /* Appropriate next item in list */
-        numFreqs *curr = freqNums;
-        while(curr->next != NULL){
-            /* Number exists? cnt is incremented */
-            if(curr->number == numbers[i]){
-                curr->cnt++;
-                incr = 1;
-                break;
-            }
-            curr = curr->next;
-        }
-        
-        /* A new number is added */
-        if(incr == 0 && numbers[i] < maxFactor){
-            curr->number = numbers[i];
-            curr->cnt = 1;
-            curr->next = malloc(sizeof(numFreqs));
-            curr->next->next = NULL;
-            curr = curr->next;
-        }
-    }
-}
-
-/* Free allocated memory */
-void freeNums(numFreqs *freqNums)
-{
-    numFreqs *curr = freqNums;
-    numFreqs *currNext = NULL;
-    while(curr != NULL){
-        currNext = curr->next;
-        free(curr);
-        curr = currNext;
-    }
-}
-
-/* Calculate factors and push to linked list 
- * Returns void
- * */
 void getFactors(uint number, numFreqs *freqNums)
 {
 	uint i, j = 0;
@@ -85,10 +31,12 @@ void getFactors(uint number, numFreqs *freqNums)
 
 /* Determines most likeley key sizes using Kasinski's examination 
  * Returns: void
- * Updates keySizes array
+ * Input: cipherText, keyLengths array
  * */
-void returnKeyLengths(int len, char *cipherText, uint *keyLengths)
+extern void returnKeyLengths(char *cipherText, uint *keyLengths)
 {
+   uint len = strlen(cipherText);
+
    /* Define frequent numbers struct */
    numFreqs *freqNums = malloc(sizeof(numFreqs)); 
    freqNums->next = NULL;
@@ -206,7 +154,7 @@ SVFRNA";
 
    /* Currently only interested in the two most likely key lengths */
    uint keyLengths[2];
-   returnKeyLengths(strlen(cipherText), cipherText, keyLengths);
+   returnKeyLengths(cipherText, keyLengths);
    printf("Most likely key length: %d or: %d\n", keyLengths[0], keyLengths[1]);
 
    return 0;

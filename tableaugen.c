@@ -1,4 +1,4 @@
-#include "main.h"
+#include "generic.h"
 
 _Bool populateTableau(cuint size, char (*tab)[size], cchar *alphabet)
 {
