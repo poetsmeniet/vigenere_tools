@@ -2,79 +2,212 @@
 #include <string.h>
 #include "main.h"
 
-void printFactors(uint number)
-{
-	int i;
+/* Stores numbers and their occurences */
+typedef struct numberFrequencies{
+    uint number;
+    uint cnt;
+    struct numberFrequencies *next;
+}numFreqs;
 
-	printf("Factors of %d are: ", number);
-	for(i=1; i <= number; i++){
-		if (number % i == 0)
-			printf("%d ",i);
+/* Push numbers into struct */
+void pushNums(uint *numbers, uint sz, numFreqs *freqNums)
+{
+    uint i;
+    uint maxFactor = 20;
+
+    for(i = 0; i < sz; i++){
+        uint incr = 0;
+
+        /* Appropriate next item in list */
+        numFreqs *curr = freqNums;
+        while(curr->next != NULL){
+            /* Number exists? cnt is incremented */
+            if(curr->number == numbers[i]){
+                curr->cnt++;
+                incr = 1;
+                break;
+            }
+            curr = curr->next;
+        }
+        
+        /* A new number is added */
+        if(incr == 0 && numbers[i] < maxFactor){
+            curr->number = numbers[i];
+            curr->cnt = 1;
+            curr->next = malloc(sizeof(numFreqs));
+            curr->next->next = NULL;
+            curr = curr->next;
+        }
+    }
+}
+
+/* Free allocated memory */
+void freeNums(numFreqs *freqNums)
+{
+    numFreqs *curr = freqNums;
+    numFreqs *currNext = NULL;
+    while(curr != NULL){
+        currNext = curr->next;
+        free(curr);
+        curr = currNext;
+    }
+}
+
+/* Calculate factors and push to linked list 
+ * Returns void
+ * */
+void getFactors(uint number, numFreqs *freqNums)
+{
+	uint i, j = 0;
+    uint minKey = 3;
+
+	printf("Factors(%d) are: ", number);
+	for(i=minKey; i <= number; i++){
+		if(number % i == 0)
+            j++;
 	}
+
+    uint myNumbers[j];
+    uint k = 0;
+	
+    for(i=minKey; i <= number; i++){
+		if(number % i == 0){
+            printf("%d ", i);
+            myNumbers[k] = i;
+            k++;
+        }
+	}
+
+    /* Push numbers to linked list */
+    pushNums(myNumbers, j, freqNums);
     printf("\n");
 }
 
-void returnRepeatedPatterns(int len, char *cipherText)
+/* Determines most likeley key sizes using Kasinski's examination 
+ * Returns: void
+ * Updates keySizes array
+ * */
+void returnKeyLengths(int len, char *cipherText, uint *keyLengths)
 {
-    printf("Cipher text: %s, len: %d\n", cipherText, len);
+   /* Define frequent numbers struct */
+   numFreqs *freqNums = malloc(sizeof(numFreqs)); 
+   freqNums->next = NULL;
 
-	uint maxLength = len / 4 + 1;
-    printf("Determined max key length: %d\n", maxLength);
+   printf("Cipher text: %s, len: %d\n", cipherText, len);
 
-    /* For each key length starting from 3 to maxLength, 
-     * look for repeated patterns */
-    uint size;
-    for(size = 3; size <= maxLength; size++){
-        uint w1Cnt = 0;
-        uint w2Cnt = size;
-        char w1[size + 1];
-        char w2[size + 1];
-        uint i;
+   uint minKey = 3;
 
-        while(1){
-            /* Populate words 1 and 2 of length 'size' to compare using strcmp */
-            for(i = 0; i < size; i++){
-                w1[i] = cipherText[w1Cnt + i];
-            }
-            w1[i] = '\0';
+   /* This must be tweaked during testing */
+   uint maxLength = len / 4 + 1;
+    if(maxLength > 12)
+        maxLength = 12;
+   printf("Determined max key length: %d\n", maxLength);
 
-            for(i = 0; i < size; i++){
-                w2[i] = cipherText[w1Cnt + w2Cnt + i];
-            }
-            w2[i] = '\0';
+   /* For each key length starting from 3 to maxLength, 
+    * look for repeated patterns */
+   uint size;
+   for(size = minKey; size <= maxLength; size++){
+       uint w1Cnt = 0;
+       uint w2Cnt = size;
+       char w1[size + 1];
+       char w2[size + 1];
+       uint i;
 
-            /* Compare word 1 and word 2.
-             * If strcomp returns 0, we save the offsets and: 
-             *  1. calculate distance
-             *  2. factorize distances
-             *  3. determine most common factors */
-            if(strcmp(w1, w2) == 0){
-                uint w2Offset = w2Cnt + w1Cnt;
-                uint distance = ((w2Cnt + w1Cnt) - w1Cnt);
-                printf("Repeating pattern found! %s(offset: %d) = %s(offset: %d). Size: %d, distance: %d\t", w1, w1Cnt, w2, w2Offset, size, distance);
+       while(1){
+           /* Populate words 1 and 2 of length 'size' to compare using strcmp */
+           for(i = 0; i < size; i++){
+               w1[i] = cipherText[w1Cnt + i];
+           }
+           w1[i] = '\0';
 
-                printFactors(distance);
-            }
+           for(i = 0; i < size; i++){
+               w2[i] = cipherText[w1Cnt + w2Cnt + i];
+           }
+           w2[i] = '\0';
 
-            w2Cnt++;
-            
-            /* Updating counters for word by word comparison */
-            if(w2Cnt + w1Cnt + size > len){
-                w2Cnt = size;
-                w1Cnt++;
+           /* Compare word 1 and word 2.
+            * If strcomp returns 0, we save the offsets and: 
+            *  1. calculate distance
+            *  2. factorize distances
+            *  3. store factors and their occurences */
+           if(strcmp(w1, w2) == 0){
+               uint w2Offset = w2Cnt + w1Cnt;
+               uint distance = ((w2Cnt + w1Cnt) - w1Cnt);
+               printf("Pattern: %s(%d) \t= %s(%d). Size: %d\tdist: %d\t", w1, w1Cnt, w2, w2Offset, size, distance);
 
-                if(w1Cnt > len - (size * 2))
-                    break;
-            }
-                            
-        }
-    }/* End of size increment for loop */
+               getFactors(distance, freqNums);
+           }
 
+           w2Cnt++;
+           
+           /* Updating counters for word by word comparison */
+           if(w2Cnt + w1Cnt + size > len){
+               w2Cnt = size;
+               w1Cnt++;
+
+               if(w1Cnt > len - (size * 2))
+                   break;
+           }
+                           
+       }
+   }/* End of size increment for loop */
+   
+   /* Return most common key length (factors) */
+   numFreqs *curr = freqNums;
+   uint highest = 0;
+   uint highestCnt = 0;
+
+   while(curr->next != NULL){
+       printf("%d(%d) ", curr->number, curr->cnt);
+       if(curr->cnt >= highestCnt){
+           /* Store previous highest */
+           keyLengths[1] = highest;
+
+           highestCnt = curr->cnt;
+           highest = curr->number;
+           /* Store current highest */
+           keyLengths[0] = highest;
+       }
+       curr = curr->next;
+   }
+   printf("\nHighest factor with higest count: %d (cnt: %d)\n", highest, highestCnt);
+
+   freeNums(freqNums);
 }
 
+/* Main is just for testing now */
 int main(void)
 {
-    char cipherText[] = "VHVSSPQUCEMRVBVBBBVHVSURQGIBDUGRNICJQUCERVUAXSSR";
-    returnRepeatedPatterns(strlen(cipherText), cipherText);
-    return 0;
+    //char cipherText[] = "AREIILUYZTJKUBSOLXBRQGYTHVCKEHHUCCRTNXUKAGATWZKVQROZDDRWSHXPDNUTNTJIXXRYTHVALGNMEWRJHZTZNJOLCHNNBDLRFKCCDNJLKWNVPKEHSWJEXKKBJOLXBCRCBTNXJOAUOXFECCDKKTHVNURUKOKAHBXHGXNGOCGEXCROTXABARRHNPLXBSOLWVUVOGPKBMHRXHNDYLNMLKWNPOXXPOGWMOZDDSXSZUADQHTNBJQCRMGDASCPOXXNOJOIYMEMORRZXODRQGZAACLUIVM";
+	//char cipherText[] = "CVJTNAFENMCDMKBXFSTKLHGSOJWHOFUISFYFBEXEINFIMAYSSDYYIJNPWTOKFRHWVWTZFXH\
+LUYUMSGVDURBWBIVXFAFMYFYXPIGBHWIFHHOJBEXAUNFIYLJWDKNHGAOVBHHGVINAULZFOF\
+UQCVFBYNFTYGMMSVGXCFZFOKQATUIFUFERQTEWZFOKMWOJYLNZBKSHOEBPNAYTFKNXLBVU\
+AXCXUYYKYTFRHRCFUYCLUKTVGUFQBESWYSSWLBYFEFZVUWTRLLNGIZGBMSZKBTNTSLNNMD\
+PMYMIUBVMTLOBJHHFWTJNAUFIZMBZLIVHMBSUWLBYFEUYFUFENBRVJVKOLLGTVUZUAOJNVU\
+WTRLMBATZMFSSOJQXLFPKNAULJCIOYVDRYLUJMVMLVMUKBTNAMFPXXJPDYFIJFYUWSGVIUM\
+BWSTUXMSSNYKYDJMCGASOUXBYSMCMEUNFJNAUFUYUMWSFJUKQWSVXXUVUFFBPWBCFYL\
+WFDYGUKDRYLUJMFPXXEFZQXYHGFLACEBJBXQSTWIKNMORNXCJFAIBWWBKCMUKIVQTMNBC\
+CTHLJYIGIMSYCFVMURMAYOBJUFVAUZINMATCYPBANKBXLWJJNXUJTWIKBATCIOYBPPZHLZJJZ\
+HLLVEYAIFPLLYIJIZMOUDPLLTHVEVUMBXPIBBMSNSCMCGONBHCKIVLXMGCRMXNZBKQHODESY\
+TVGOUGTHAGRHRMHFREYIJIZGAUNFZIYZWOUYWQZPZMAYJFJIKOVFKBTNOPLFWHGUSYTLGN\
+RHBZSOPMIYSLWIKBANYUOYAPWZXHVFUQAIATYYKYKPMCEYLIRNPCDMEIMFGWVBBMUPLHML\
+QJWUGSKQVUDZGSYCFBSWVCHZXFEXXXAQROLYXPIUKYHMPNAYFOFHXBSWVCHZXFEXXXAIR\
+PXXGOVHHGGSVNHWSFJUKNZBESHOKIRFEXGUFVKOLVJNAYIVVMMCGOFZACKEVUMBATVHKID\
+MVXBHLIVWTJAUFFACKHCIKSFPKYQNWOLUMYVXYYKYAOYYPUKXFLMBQOFLACKPWZXHUFJYG\
+ZGSTYWZGSNBBWZIVMNZXFIYWXWBKBAYJFTIFYKIZMUIVZDINLFFUVRGSSBUGNGOPQAILIFOZ\
+BZFYUWHGIRHWCFIZMWYSUYMAUDMIYVYAWVNAYTFEYYCLPWBBMVZZHZUHMRWXCFUYYVIEN\
+FHPYSMKBTMOIZWAIXZFOLBSMCHHNOJKBMBATZXXJSSKNAULBJCLFWXDSUYKUCIOYJGFLMBW\
+HFIWIXSFGXCZBMYMBWTRGXXSHXYKZGSDSLYDGNBXHAUJBTFDQCYTMWNPWHOFUISMIFFVXF\
+SVFRNA";
+
+    // challenge: https://pi.math.cornell.edu/~mec/2003-2004/cryptography/polyalpha/polyalpha.html
+    char cipherText[] = "ICJEVAQIPWBCIJRQFVIFAZCPQYMJAHNGFYDHWEQRNARELKBRYGPCSPKWBUPGKBKZWDSZXSAFZLOIWETVPSITQISOTFKKVTQPSEOWKPVRLJIECHOHITFPSUDXXARCLJSNLUBOIPRJHYPIEFJERBTVMUQOIJZAGYLOHSEOHWJFCLJGGTWACWEKEGKZNASGEKAIETWARJEDPSJYHQHILOEBKSHAJVYWKTKSLOBFEVQQTPHZWERZAARVHISOTFKOGCRLCJLOKTRYDHZZLQYSFYWDSWZOHCNTQCPRDLOARVHSOIERCSKSHNARVHLSRNHPCXPWDSILPLZVQLJOENLWZJFSLCIEDJRRYXJRVCVPOEOLJUFYRQFGLUPHYLWISOTFKWJERNSTZQMIVCWDSCZVPHVCUEHFCBEBKPAWGEPZISOTFKOEODNWQZQWHYPVAHKWHISEEGAHRTOEGCPIPHFJRQ";
+
+
+   /* Currently only interested in the two most likely key lengths */
+   uint keyLengths[2];
+   returnKeyLengths(strlen(cipherText), cipherText, keyLengths);
+   printf("Most likely key length: %d or: %d\n", keyLengths[0], keyLengths[1]);
+
+   return 0;
 }
