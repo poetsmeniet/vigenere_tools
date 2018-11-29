@@ -17,11 +17,24 @@ typedef struct numberFrequencies{
     struct numberFrequencies *next;
 }numFreqs;
 
+/* Stores chars and their occurences */
+typedef struct charFrequencies{
+    char letter;
+    uint cnt;
+    struct charFrequencies *next;
+}charFreqs;
+
 /* Push numbers into struct and increments count*/
 void pushNums(uint *numbers, uint sz, numFreqs *freqNums);
 
+/* Push numbers into struct and increments count*/
+void pushChars(char *chars, uint sz, charFreqs *freqChars);
+
 /* Free allocated memory */
 void freeNums(numFreqs *freqNums);
+
+/* Free allocated memory */
+void freeChars(charFreqs *freqChars);
 
 /* Displays help text */
 void displayHelp();
