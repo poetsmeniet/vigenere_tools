@@ -68,12 +68,10 @@ void analyzeFrequencies(char * letters, char *text, uint *keyLengths, char *dest
 
             /* Add two most common letters to dest */
             if(curr->letter == letters[i] && dest[0] == '\0'){
-                //printf("Added %c to dest[0]\n", curr->letter);
+                //printf("1Added %c to dest[0]\n", curr->letter);
                 dest[0] = curr->letter;
-            }
-
-            if(curr->next->letter == letters[i] && dest[1] == '\0'){
-                //printf("Added %c to dest[1]\n", curr->next->letter);
+            }else if(curr->next->letter == letters[i] && dest[1] == '\0' && dest[0] != '\0'){
+                //printf("2Added %c to dest[1]\n", curr->next->letter);
                 dest[1] = curr->next->letter;
             }
         }
@@ -243,13 +241,14 @@ SVFRNA";
 
 
    /* Analyse frequenty distribution of every first column*/
-   uint totalSize = strlen(cipherText) / keyLengths[0] + 1;
-   char letters[totalSize];
    uint i;
    uint j = 0;
-   uint shift = 2;
-   for(i = 0; i < keyLengths[0] * keyLengths[0]; i++){
-       if(i % (keyLengths[0] + shift) == 0){
+   uint shift = 6;
+   uint totalSize = strlen(cipherText) / keyLengths[0] + shift;
+   char letters[totalSize];
+
+   for(i = 0; i < (keyLengths[0] * keyLengths[0]) + shift; i++){
+       if(i % (keyLengths[0]) == 0){
            printf("add letter '%c'\n", cipherText[i + shift]);
            letters[j] = cipherText[i + shift];
            j++;
@@ -258,11 +257,6 @@ SVFRNA";
    
    letters[totalSize] = '\0';
 
-
-   
-   
-   
-   
    /* Declare variables to storeshift values */
    char dictChars[] = {'\0', '\0'};
    char ctChars[] = {'\0', '\0'};
@@ -276,8 +270,6 @@ SVFRNA";
 
    printf("Shift 1st: (%c - %c): %d\n", ctChars[0], dictChars[0], (ctChars[0] - dictChars[0]));
    printf("Shift 2nd: (%c - %c): %d\n", ctChars[1], dictChars[1], (ctChars[1] - dictChars[1]));
-   printf("2Shift 2nd: (%c - %c): %d\n", dictChars[1], ctChars[1], (dictChars[1] - ctChars[1]));
-   printf("manual: (%c - %c): %d\n", 'A', 'R', ('A' - 'R'));
 
    
    //char enDict[] = "CABCCADDDABDJBACBKLMNBOPADDDDCA";
