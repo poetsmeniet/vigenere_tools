@@ -37,8 +37,46 @@ void sortList(charFreqs *freqChars)
    }
 }
 
-/* WIP */
-void analyzeFrequencies(char * letters, char *text, uint *keyLengths, char *dest)
+void analyzeFrequencies(char * letters, uint *keyLengths, char *dest)
+{
+   printf("\nAnalyzing frequencies of chars in string\n");
+   /* Test frequency analysis */
+   charFreqs *freqChars = malloc(sizeof(charFreqs));
+   freqChars->next = NULL;
+
+   /* Add */
+   pushChars(letters, strlen(letters), freqChars);
+
+   /* Sort list */
+   sortList(freqChars);
+
+   /* Read struct */
+   charFreqs *curr = freqChars;
+   while(curr->next != NULL){
+
+        int i;
+        for(i = 0; i < strlen(letters); i++){
+            if(curr->letter == letters[i]){
+                float perc = (((float)curr->cnt / (float)strlen(letters)) * 100.00);
+                printf("%c: %d (%f) ", curr->letter, curr->cnt, perc);
+                printBars((uint)perc * 5);
+                printf("\n");
+
+                break;
+            }
+        }
+        curr = curr->next;
+   }
+
+   /* Set most frequent and second most frequent result */
+   dest[0] = freqChars->letter;
+   dest[1] = freqChars->next->letter;
+   /* Free struct */
+   freeChars(freqChars);
+}
+
+/* Analyze text, count all letters therein*/
+void analyzeFrequenciesLetters(char * letters, char *text, uint *keyLengths, char *dest)
 {
    printf("\nAnalyzing frequencies of string, using letters '%s'\n\n", letters);
    /* Test frequency analysis */
@@ -211,8 +249,6 @@ int main(void)
     // challenge: https://pi.math.cornell.edu/~mec/2003-2004/cryptography/polyalpha/polyalpha.html
     //char cipherText[] = "ICJEVAQIPWBCIJRQFVIFAZCPQYMJAHNGFYDHWEQRNARELKBRYGPCSPKWBUPGKBKZWDSZXSAFZLOIWETVPSITQISOTFKKVTQPSEOWKPVRLJIECHOHITFPSUDXXARCLJSNLUBOIPRJHYPIEFJERBTVMUQOIJZAGYLOHSEOHWJFCLJGGTWACWEKEGKZNASGEKAIETWARJEDPSJYHQHILOEBKSHAJVYWKTKSLOBFEVQQTPHZWERZAARVHISOTFKOGCRLCJLOKTRYDHZZLQYSFYWDSWZOHCNTQCPRDLOARVHSOIERCSKSHNARVHLSRNHPCXPWDSILPLZVQLJOENLWZJFSLCIEDJRRYXJRVCVPOEOLJUFYRQFGLUPHYLWISOTFKWJERNSTZQMIVCWDSCZVPHVCUEHFCBEBKPAWGEPZISOTFKOEODNWQZQWHYPVAHKWHISEEGAHRTOEGCPIPHFJRQ";
 
-
-
 	char cipherText[] = "CVJTNAFENMCDMKBXFSTKLHGSOJWHOFUISFYFBEXEINFIMAYSSDYYIJNPWTOKFRHWVWTZFXH\
 LUYUMSGVDURBWBIVXFAFMYFYXPIGBHWIFHHOJBEXAUNFIYLJWDKNHGAOVBHHGVINAULZFOF\
 UQCVFBYNFTYGMMSVGXCFZFOKQATUIFUFERQTEWZFOKMWOJYLNZBKSHOEBPNAYTFKNXLBVU\
@@ -240,41 +276,77 @@ SVFRNA";
    printf("Most likely key length: %d or: %d\n", keyLengths[0], keyLengths[1]);
 
 
-   /* Analyse frequenty distribution of every first column*/
+   /* Analyse frequenty distribution of every nth column*/
    uint i;
    uint j = 0;
-   uint shift = 6;
-   uint totalSize = strlen(cipherText) / keyLengths[0] + shift;
-   char letters[totalSize];
+   uint col = 5;
+   uint totSz = strlen(cipherText);
+   uint totColSz = (strlen(cipherText) / keyLengths[0]) + col + 1;
+   char letters[totColSz + 1];
 
-   for(i = 0; i < (keyLengths[0] * keyLengths[0]) + shift; i++){
+   /* Add every nth column to char array */
+   for(i = 0; i < totSz; i++){
        if(i % (keyLengths[0]) == 0){
-           printf("add letter '%c'\n", cipherText[i + shift]);
-           letters[j] = cipherText[i + shift];
+           letters[j] = cipherText[i + col];
+           //printf("add letter (index %d) '%c'\n", j, letters[j]);
            j++;
        }
    }
    
-   letters[totalSize] = '\0';
+   printf("totColSz: %d, j=%d\n", totColSz, j);
+   letters[totColSz - col] = '\0';
 
    /* Declare variables to storeshift values */
    char dictChars[] = {'\0', '\0'};
    char ctChars[] = {'\0', '\0'};
-   
-   /* compare with enlish dict */
-   analyzeFrequencies("ABCDEFGHIJKLMNOPQRSTUVWXYZ", enDict, keyLengths, dictChars);
-   analyzeFrequencies(letters, cipherText, keyLengths, ctChars);
+
+   /* compare with English dict */
+   analyzeFrequencies(enDict, keyLengths, dictChars);
+   analyzeFrequencies(letters, keyLengths, ctChars);
 
    printf("dict: %c en %c\n", dictChars[0], dictChars[1]);
    printf("ct: %c en %c\n", ctChars[0], ctChars[1]);
 
-   printf("Shift 1st: (%c - %c): %d\n", ctChars[0], dictChars[0], (ctChars[0] - dictChars[0]));
-   printf("Shift 2nd: (%c - %c): %d\n", ctChars[1], dictChars[1], (ctChars[1] - dictChars[1]));
+   //printf("Shift 1st: (%c - %c): %d\n", ctChars[0], dictChars[0], (ctChars[0] - dictChars[0]));
+   //printf("Shift 2nd: (%c - %c): %d\n", ctChars[1], dictChars[1], (ctChars[1] - dictChars[1]));
+   //printf("manual: %c - %c = %d\n", 'S', 'E', 'S' - 'E');
+   //printf("manual: %c - %c = %d\n", 'S', 'T', 'S' - 'T');
+   //printf("manual: %c - %c = %d\n", 'S', 'A', 'S' - 'A');
 
+   /* Shift monoalphabetic cipher */
+   int detShift = (ctChars[0] - dictChars[0]);
+
+   char shiftedString[totColSz + 1];printf("totcolsz: %d\n", totColSz);
+   int shiftChar;
+   uint l;
+
+   /* Apply shift to column */
+   for(l = 0; l < totColSz; l++){
+       shiftChar = letters[l] - (detShift - 26);
+
+       uint modulus; 
+
+       if(col == 0)
+           modulus = 65;
+       else
+           modulus = 64;
+
+       /* Greater than Z -> modulo */
+       if(shiftChar > 90)
+           shiftChar = (shiftChar % 90) + modulus;
+
+       if(detShift == 1)
+           shiftChar -= 1;
+
+       if(shiftChar < 65)
+           shiftChar = 'Z';
+
+       shiftedString[l] = shiftChar;
+   }
    
-   //char enDict[] = "CABCCADDDABDJBACBKLMNBOPADDDDCA";
-   //analyzeFrequencies("ADBC", enDict, keyLengths);
-   
+   shiftedString[totColSz - col] = '\0';
+
+   printf("Shifting word (col %d):\n'%s' to: \n'%s' by value %d\n", col, letters, shiftedString, detShift);
 
    return 0;
 }
