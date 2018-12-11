@@ -4,32 +4,32 @@
 #include "generic.h"
 #define MINKEY 4
 
+/* Sorts struct using simple bubblesort */
 void sortList(charFreqs *freqChars)
 {
-   /* Read struct */
-   charFreqs *curr = freqChars;
-   while(curr->next->next != NULL){
+    /* Read struct */
+    charFreqs *curr = freqChars;
+    while(curr->next->next != NULL){
+        /* Swap data using simple bubblesort */
+        if(curr->cnt < curr->next->cnt){
+            //printf("\tswap %c with %c\n", curr->letter, curr->next->letter);
+            
+            uint ll = curr->letter;
+            uint lcnt = curr->cnt;
+            uint hl = curr->next->letter;
+            uint hcnt = curr->next->cnt;
 
-       /* Swap data using simple bubblesort */
-       if(curr->cnt < curr->next->cnt){
-           //printf("\tswap %c with %c\n", curr->letter, curr->next->letter);
-           
-           uint ll = curr->letter;
-           uint lcnt = curr->cnt;
-           uint hl = curr->next->letter;
-           uint hcnt = curr->next->cnt;
+            curr->next->letter = ll;
+            curr->next->cnt = lcnt;
+            curr->letter = hl;
+            curr->cnt = hcnt;
 
-           curr->next->letter = ll;
-           curr->next->cnt = lcnt;
-           curr->letter = hl;
-           curr->cnt = hcnt;
+            /* Recurse.. */
+            sortList(freqChars);
+        }
 
-           /* Recurse.. */
-           sortList(freqChars);
-       }
-
-       curr = curr->next;
-   }
+        curr = curr->next;
+    }
 }
 
 void printBars(uint cnt)
@@ -39,45 +39,49 @@ void printBars(uint cnt)
         printf("-");
 }
 
+/* Analyze frequency distribution of:
+ * colChars STRING
+ * outputs: array of most frequent chars
+ * */
 void analyzeFrequencies(char * colChars, uint *keyLengths, char *dest)
 {
-   printf("\nAnalyzing frequencies of chars in string\n");
-   /* Test frequency analysis */
-   charFreqs *freqChars = malloc(sizeof(charFreqs));
-   freqChars->next = NULL;
+    printf("\nAnalyzing frequencies of chars in string\n");
+    /* Test frequency analysis */
+    charFreqs *freqChars = malloc(sizeof(charFreqs));
+    freqChars->next = NULL;
 
-   /* Add chars to struct for analysis */
-   pushChars(colChars, strlen(colChars), freqChars);
+    /* Add chars to struct for analysis */
+    pushChars(colChars, strlen(colChars), freqChars);
 
-   /* Sort list */
-   sortList(freqChars);
+    /* Sort list */
+    sortList(freqChars);
 
-   /* Read struct */
-   charFreqs *curr = freqChars;
-   while(curr->next != NULL){
+    /* Read struct */
+    charFreqs *curr = freqChars;
+    while(curr->next != NULL){
 
-        int i;
-        for(i = 0; i < strlen(colChars); i++){
-            if(curr->letter == colChars[i]){
-                float perc = (((float)curr->cnt / (float)strlen(colChars)) * 100.00);
-                printf("%c(%d): %d (%f) ", curr->letter, curr->letter, curr->cnt, perc);
-                printBars((uint)perc * 5);
-                printf("\n");
+         int i;
+         for(i = 0; i < strlen(colChars); i++){
+             if(curr->letter == colChars[i]){
+                 float perc = (((float)curr->cnt / (float)strlen(colChars)) * 100.00);
+                 printf("%c(%d): %d (%f) ", curr->letter, curr->letter, curr->cnt, perc);
+                 printBars((uint)perc * 5);
+                 printf("\n");
 
-                break;
-            }
-        }
-        curr = curr->next;
-   }
+                 break;
+             }
+         }
+         curr = curr->next;
+    }
 
-   /* Set most frequent and second most frequent result 
-    * Note: most naive code
-    * */
-   dest[0] = freqChars->letter;
-   dest[1] = freqChars->next->letter;
-   
-   /* Free struct */
-   freeChars(freqChars);
+    /* Set most frequent and second most frequent result 
+     * Note: most naive code
+     * */
+    dest[0] = freqChars->letter;
+    dest[1] = freqChars->next->letter;
+    
+    /* Free struct */
+    freeChars(freqChars);
 }
 
 /* Gets all the factors of a number 
@@ -86,21 +90,21 @@ void analyzeFrequencies(char * colChars, uint *keyLengths, char *dest)
  * */
 void getFactors(uint number, numFreqs *freqNums)
 {
-	uint i, j = 0;
-
-	for(i=MINKEY; i <= number; i++)
-		if(number % i == 0)
+    uint i, j = 0;
+    
+    for(i=MINKEY; i <= number; i++)
+        if(number % i == 0)
             j++;
 
     uint myNumbers[j];
     uint k = 0;
-	
+    
     for(i=MINKEY; i <= number; i++){
-		if(number % i == 0){
+        if(number % i == 0){
             myNumbers[k] = i;
             k++;
         }
-	}
+    }
 
     /* Push numbers to linked list */
     pushNums(myNumbers, j, freqNums);
@@ -109,89 +113,93 @@ void getFactors(uint number, numFreqs *freqNums)
 /* Determines most likeley key sizes using Kasinski's examination 
  * Returns: void
  * Input: cipherText, keyLengths array
+ *
+ * Todo:
+ *  - add some logic to deal with edge cases 
+ *  - a bit slow on larger keys
  * */
 extern void returnKeyLengths(char *cipherText, uint *keyLengths)
 {
-   uint len = strlen(cipherText);
+    uint len = strlen(cipherText);
 
-   /* Define frequent numbers struct */
-   numFreqs *freqNums = malloc(sizeof(numFreqs)); 
-   freqNums->next = NULL;
+    /* Define frequent numbers struct */
+    numFreqs *freqNums = malloc(sizeof(numFreqs)); 
+    freqNums->next = NULL;
 
-   printf("Cipher text: %s, len: %d\n", cipherText, len);
+    printf("Cipher text: %s, len: %d\n", cipherText, len);
 
-   /* This must be tweaked during testing */
-   uint maxLength = len / 4 + 1;
-    if(maxLength > 14)
-        maxLength = 14;
+    /* This must be tweaked during testing */
+    uint maxLength = len / 4 + 1;
+     if(maxLength > 14)
+         maxLength = 14;
 
-   /* For each key length starting from 4 to maxLength, 
-    * look for repeated patterns */
-   uint size;
-   for(size = MINKEY; size <= maxLength; size++){
-       uint w1Cnt = 0;
-       uint w2Cnt = size;
-       char w1[size + 1];
-       char w2[size + 1];
-       uint i;
+    /* For each key length starting from 4 to maxLength, 
+     * look for repeated patterns */
+    uint size;
+    for(size = MINKEY; size <= maxLength; size++){
+        uint w1Cnt = 0;
+        uint w2Cnt = size;
+        char w1[size + 1];
+        char w2[size + 1];
+        uint i;
 
-       while(1){
-           /* Populate words 1 and 2 of length 'size' to compare using strcmp */
-           for(i = 0; i < size; i++){
-               w1[i] = cipherText[w1Cnt + i];
-           }
-           w1[i] = '\0';
+        while(1){
+            /* Populate words 1 and 2 of length 'size' to compare using strcmp */
+            for(i = 0; i < size; i++){
+                w1[i] = cipherText[w1Cnt + i];
+            }
+            w1[i] = '\0';
 
-           for(i = 0; i < size; i++){
-               w2[i] = cipherText[w1Cnt + w2Cnt + i];
-           }
-           w2[i] = '\0';
+            for(i = 0; i < size; i++){
+                w2[i] = cipherText[w1Cnt + w2Cnt + i];
+            }
+            w2[i] = '\0';
 
-           /* Compare word 1 and word 2.
-            * If strcomp returns 0, we save the offsets and: 
-            *  1. calculate distance
-            *  2. factorize distances
-            *  3. store factors and their occurences */
-           if(strcmp(w1, w2) == 0){
-               uint distance = ((w2Cnt + w1Cnt) - w1Cnt);
-               //printf("Pattern: %s(%d) \t= %s(%d). Size: %d\tdist: %d\t\n", w1, w1Cnt, w2, w2Offset, size, distance);
+            /* Compare word 1 and word 2.
+             * If strcomp returns 0, we save the offsets and: 
+             *  1. calculate distance
+             *  2. factorize distances
+             *  3. store factors and their occurences */
+            if(strcmp(w1, w2) == 0){
+                uint distance = ((w2Cnt + w1Cnt) - w1Cnt);
+                //printf("Pattern: %s(%d) \t= %s(%d). Size: %d\tdist: %d\t\n", w1, w1Cnt, w2, w2Offset, size, distance);
 
-               getFactors(distance, freqNums);
-           }
+                getFactors(distance, freqNums);
+            }
 
-           w2Cnt++;
-           
-           /* Updating counters for word by word comparison */
-           if(w2Cnt + w1Cnt + size > len){
-               w2Cnt = size;
-               w1Cnt++;
+            w2Cnt++;
+            
+            /* Updating counters for word by word comparison */
+            if(w2Cnt + w1Cnt + size > len){
+                w2Cnt = size;
+                w1Cnt++;
 
-               if(w1Cnt > len - (size * 2))
-                   break;
-           }
-                           
-       }
-   }/* End of size increment for loop */
-   
-   /* Return most common key length (factors) */
-   numFreqs *curr = freqNums;
-   uint highest = 0;
-   uint highestCnt = 0;
+                if(w1Cnt > len - (size * 2))
+                    break;
+            }
+                            
+        }
+    }/* End of size increment for loop */
+    
+    /* Return most common key length (factors) */
+    numFreqs *curr = freqNums;
+    uint highest = 0;
+    uint highestCnt = 0;
 
-   while(curr->next != NULL){
-       if( ((float)curr->cnt * 1.1) >= (float)highestCnt){
-           /* Store previous highest */
-           keyLengths[1] = highest;
+    while(curr->next != NULL){
+        if( ((float)curr->cnt * 1.1) >= (float)highestCnt){
+            /* Store previous highest */
+            keyLengths[1] = highest;
 
-           highestCnt = curr->cnt;
-           highest = curr->number;
-           /* Store current highest */
-           keyLengths[0] = highest;
-       }
-       curr = curr->next;
-   }
+            highestCnt = curr->cnt;
+            highest = curr->number;
+            /* Store current highest */
+            keyLengths[0] = highest;
+        }
+        curr = curr->next;
+    }
 
-   freeNums(freqNums);
+    freeNums(freqNums);
 }
 
 /* This function inserts chars;
@@ -278,71 +286,71 @@ void devPrint(char *dictChars, char *ctChars)
  *   */
 void crack(char *cipherText, cchar *alphabet)
 {
-   /* Currently only interested in the two most likely key lengths */
-   uint keyLengths[2];
-   keyLengths[0] = 0;
-   keyLengths[1] = 0;
+    /* Currently only interested in the two most likely key lengths */
+    uint keyLengths[2];
+    keyLengths[0] = 0;
+    keyLengths[1] = 0;
 
-   returnKeyLengths(cipherText, keyLengths);
+    returnKeyLengths(cipherText, keyLengths);
 
-   assert(keyLengths[0] > 0);
-   printf("Most likely key length: %d or: %d\n", keyLengths[0], keyLengths[1]);
+    assert(keyLengths[0] > 0);
+    printf("Most likely key length: %d or: %d\n", keyLengths[0], keyLengths[1]);
 
-   /* char array clearText will be filled with decrypted chars */
-   const uint ctLen = strlen(cipherText);
-   char clearText[ctLen];
-   char keyString[keyLengths[0]];
-   clearText[ctLen - 1] = '\0';
+    /* char array clearText will be filled with decrypted chars */
+    const uint ctLen = strlen(cipherText);
+    char clearText[ctLen];
+    char keyString[keyLengths[0]];
+    clearText[ctLen - 1] = '\0';
 
-   /* Analyse frequency distribution of every nth column*/
-   uint col;
-   for(col = 0; col < keyLengths[0]; col++){
-      uint i;
-      uint j = 0;
-      uint totColSz = (ctLen / keyLengths[0]) + col + 1;
-      char colChars[totColSz + 1];
+    /* Analyse frequency distribution of every nth column*/
+    uint col;
+    for(col = 0; col < keyLengths[0]; col++){
+        uint i;
+        uint j = 0;
+        uint totColSz = (ctLen / keyLengths[0]) + col + 1;
+        char colChars[totColSz + 1];
 
-      /* Add every nth column to char array */
-      for(i = 0; i < ctLen; i++){
-          if(i % (keyLengths[0]) == 0){
-              colChars[j] = cipherText[i + col];
-              j++;
-          }
-      }
-      
-      colChars[totColSz - col] = '\0';
+        /* Add every nth column to char array */
+        for(i = 0; i < ctLen; i++){
+            if(i % (keyLengths[0]) == 0){
+                colChars[j] = cipherText[i + col];
+                j++;
+            }
+        }
+        
+        colChars[totColSz - col] = '\0';
 
-      /* Declare variables to store shift values */
-      char dictChars[] = {'\0', '\0'};
-      char ctChars[] = {'\0', '\0'};
+        /* Declare variables to store shift values */
+        char dictChars[] = {'\0', '\0'};
+        char ctChars[] = {'\0', '\0'};
 
-      /* compare with English dict */
-      analyzeFrequencies(enDict, keyLengths, dictChars);
-      analyzeFrequencies(colChars, keyLengths, ctChars);
+        /* compare with English dict */
+        analyzeFrequencies(enDict, keyLengths, dictChars);
+        analyzeFrequencies(colChars, keyLengths, ctChars);
 
-      //devPrint(dictChars, ctChars);
+        //devPrint(dictChars, ctChars);
 
-      /* Determine shift of monoalphabetic cipher */
-      int detShift = (ctChars[0] - dictChars[0]);
+        /* Determine shift of monoalphabetic cipher */
+        int detShift = (ctChars[0] - dictChars[0]);
 
-      /* Apply shift and store in new string */
-      char shiftedString[totColSz + 1];
-      
-      applyShift(shiftedString, colChars, detShift, totColSz, col, alphabet);
+        /* Apply shift and store in new string */
+        char shiftedString[totColSz + 1];
+        
+        applyShift(shiftedString, colChars, detShift, totColSz, col, alphabet);
 
-      /* Copy shifted column values to decrypted string */
-      insertStringAtCol(shiftedString, clearText, col, ctLen, keyLengths[0]);
+        /* Copy shifted column values to decrypted string */
+        insertStringAtCol(shiftedString, clearText, col, ctLen, keyLengths[0]);
 
-      //printf("Shifted string (col %d):\n'%s' to: \n'%s' by value %d\n", col, colChars, shiftedString, detShift);
+        //printf("Shifted string (col %d):\n'%s' to: \n'%s' by value %d\n", col, colChars, shiftedString, detShift);
 
-      /* Add a letter to the key string */
-      uint offset = alphabet[0];          //First char ascii code (65)
-      keyString[col] = offset + detShift;
-   }
+        /* Add a letter to the key string */
+        uint offset = alphabet[0];          //First char ascii code (65)
+        keyString[col] = offset + detShift;
+    }
 
-   keyString[col] = '\0';
+    keyString[col] = '\0';
 
-   printf("\nKey: '%s', Clear text: \n%s\n", keyString, clearText);
+    printf("\nKey: '%s', Clear text: \n%s\n", keyString, clearText);
 }
 
 
@@ -351,8 +359,8 @@ int main(void)
 {
     char cipherText[] = "BAKMLTODDLHPTFOZWMFAFHZXMOSOHBBFKFFANURSHKSDOPZXXAVQILOETUHETURFALWDPPJQLDSDXJCYBUUFHDODWAVQMVKZMOSYXUKMERSPLSCIEFHTKVKUGNHTXDVAELPAWFTAKDODWHHQOLFKLASBHMHTXPFXHUUOKVCWXKZQZZHTXFKQKLRQYVFYXKTDHTDGLOWZZAVQISCGZOKTBJVYTRSEMOSXXMHEAVIXWLFTBNVQKHBPULBPLAVQBYTUZBFQLZWPXDOKLMFAFYSMIPBSMOSSKHWZPOSZMOSKAHJQMVGBKLOPMOSUKSSSLZCMLACWXLDAGAVQBYTQXAHTXPFEMHFOALRNEBSNEVIEXZUXHZGKTZHTHBUTOHFZBZVQWVFZTTSZMLRMMJCXEHFMGKQGYMGIBAVMEPHFELSYUYCUWLFQWKSEBNBMGKPXHDBANAODHBBPMOSUKICZRICPBLGXHVYQWCSDRTIOASWWXIOXEVCZLHPANAHALVODPOSZVLWELBSPMDCMKTGMGKHIHMSQMZCYXVTFALGQYLZXHDGPKHUSXKOOHDCDTJOXYHHFALSZWVTMKVDQTURVNZHNXOWZWAVQTUWYTSTAESCIXKHTXPFIBCSEULOFBUUUMVJQKAVQUHQWPPHTTSSMYJCHXYSPUYOZVOHAAHGFXUWFLWOOXHBPVHFDRPBSEHFSXIOEDLHEHBHAYDVUVODDHAFGWLRFALVQTKGAYJVUVRSZLVFPNJYEMOSEXDCYXUKMERSPFVFQJBWODSMMGKSZXYUQMPQMESMFAHBFALAQGDWFAAVQBYSDXJHPKPSPNWTUZBFQLHRAKUSPPPHTLJOZMFZUMAZQLOOIEZDUGUSPHCSDMOSUKMZMMICEHTGMGKHTXPFTXHREPYOBILRDHBBPPPHTTDVUMLQXHAVQGJZALPBSMOSTTPFMGKGGKTCGGASPUFOOTWBAPHQTTYONTUQBTZGQWIMVHNUUGNOXHUUNXOWZWHBMZHBPLOOWBUUGIZHDTUUQEFHTXAKAFLBAGAVQLLOFTURFALKAFHBMMAVQUVHFHTCRMOSOTYHIAVVQEKTMLAHABAGEBKSEMVZQLZSZMOSTTYRVHSHUGNWZMOSYTYYQMWZMVLOFZVRQKCWXELKMLHUDXHHOKVKPTTWZZSSPFBZFBAIPXVTYXUOZWISMLAGFALVAKUGAYJOFMSSFALVUZOZAGNBMIWSPAHHEHMKQTSHTRWSMLHBFLAVQALOPWYSELLGAYAVQPVAQGJOYXACFALGGKMOOXVTFAHHEXHOZWAVQLOODIZVDBSZNTYYUGNJABJSEFHRQTJCZMPBGHBGIBSRPBUKTBSSMUVJQBACOVHGUHUOXEFFALLOTNNSNNYGFHMZMNNVFXYTDHTHTXZHGKKMXNUUEHMOYXYFKILOETUHAKHDDHSCZZLRNXSZAPMFAFHQAPAWQWMOEMACFALKMESCRTOCGLLWFTSZEFLZXXKCRMOSEMHPXXVTYBSYAYOOKTURAYWSDLWWDTAWAGNWHBUUAYMHTTAVMEMVGFHB";
 
-   cchar alphabet[] = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
-   crack(cipherText, alphabet);
-
-   return 0;
+    cchar alphabet[] = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+    crack(cipherText, alphabet);
+ 
+    return 0;
 }
