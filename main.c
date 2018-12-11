@@ -24,7 +24,7 @@ int main(int argc, char **argv)
     /* Fuller ascii charset: 
      * cchar alphabet[] = " !\"#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~";
      * */
-    cchar alphabet[] = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+    cchar alphabet[] = "!\"#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~";
     cuint aSize = strlen(alphabet);
 
     /* The offset is the decimal index representation of the first letter in the
@@ -104,7 +104,7 @@ int main(int argc, char **argv)
 
             returnCipherText(key, clearText, cipherText, aSize, tab);
 
-            printf("Message '%s', encrypted with key '%s' has value: '%s'\n", clearText, key, cipherText);
+            printf("%s\n", cipherText);
 
             free(clearText);
             free(key);
@@ -131,7 +131,7 @@ int main(int argc, char **argv)
             char *clearTextDecoded = malloc(sz +1);
             returnClearText(key, clearTextDecoded, cipherText, aSize, tab, offset);
 
-            printf("Message '%s', decrypted with key '%s' has value: '%s'\n", cipherText, key, clearTextDecoded);
+            printf("%s\n", clearTextDecoded);
 
             free(clearTextDecoded);
             free(cipherText);
