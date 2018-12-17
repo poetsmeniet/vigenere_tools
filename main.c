@@ -2,6 +2,7 @@
 #include "generic.h"
 #include "main.h" 
 #include "tableaugen.h"
+#include "kasinskiexam.h"
 
 /* A couple of encoding examples found on the internets: 
  * 
@@ -25,6 +26,7 @@ int main(int argc, char **argv)
      * cchar alphabet[] = " !\"#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~";
      * */
     cchar alphabet[] = "!\"#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~";
+    //cchar alphabet[] = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
     cuint aSize = strlen(alphabet);
 
     /* The offset is the decimal index representation of the first letter in the
@@ -139,7 +141,7 @@ int main(int argc, char **argv)
             break;
     
         case 'K':
-            printf("option Kasinsky\n");
+            crackVig(argv[2], alphabet);
             break;
 
         case '?':

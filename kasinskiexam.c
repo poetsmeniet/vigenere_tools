@@ -2,6 +2,7 @@
 #include <string.h>
 #include <assert.h>
 #include "generic.h"
+#include "kasinskiexam.h"
 #define MINKEY 2
 
 /* Sorts struct using simple bubblesort */
@@ -221,7 +222,6 @@ void insertStringAtCol(char *src, char *dst, uint col, cuint len, uint keySz)
             dstCol = (i + col);
 
             /* Add colChars to appropriate column and make lower case */
-            //dst[dstCol] = src[k] + 32;
             dst[dstCol] = src[k];
 
             j+=keySz;
@@ -241,30 +241,31 @@ void applyShift(char *shiftedString,
         cchar *alphabet)
 {
     uint shiftChar;
-    uint aSz = strlen(alphabet);        //The alphabet size; 26 or other
-    uint offset = alphabet[0];          //First char ascii code (65)
-    uint offsEnd = alphabet[aSz - 1];   //Last char ascii code (90)
-    uint modulus = alphabet[0] - 1;     //First char ascii code - 1 (64)
+    uint aSz = strlen(alphabet);        //The alphabet size; 
+    uint offset = alphabet[0];          //First char ascii code
+    uint offsEnd = alphabet[aSz - 1];   //Last char ascii code
+    uint modulus = alphabet[0] - 1;     //First char ascii code - 1
     uint l;
 
     /* Apply shift to this column */
     for(l = 0; l < totColSz; l++){
-       shiftChar = colChars[l] - (shift - aSz);
+        shiftChar = colChars[l] - (shift - aSz);
     
-       /* Greater than Z -> modulo */
-       if(shiftChar >= offsEnd){
+        /* Greater than Z -> modulo */
+        if(shiftChar >= offsEnd){
+            shiftChar = ((shiftChar % offsEnd) + modulus) % offsEnd;
+        }
+    
+        if(shiftChar < offset){
            shiftChar = ((shiftChar % offsEnd) + modulus) % offsEnd;
-       }
+        }
+
+        if(shift == 1)
+            shiftChar -= 1;
     
-       if(shift == 1)
-           shiftChar -= 1;
+        assert(shiftChar <= offsEnd && shiftChar >= offset);
     
-       if(shiftChar < offset)
-           shiftChar = offsEnd;
-    
-       assert(shiftChar <= offsEnd && shiftChar >= offset);
-    
-       shiftedString[l] = shiftChar;
+        shiftedString[l] = shiftChar;
     }
     
     shiftedString[totColSz - col] = '\0';
@@ -285,7 +286,7 @@ void devPrint(char *dictChars, char *ctChars)
  * - implement alphabet as passed param 
  * - improve freq analysis
  *   */
-void crack(char *cipherText, cchar *alphabet)
+extern void crackVig(char *cipherText, cchar *alphabet)
 {
     /* Currently only interested in the two most likely key lengths */
     uint keyLengths[2];
@@ -333,7 +334,7 @@ void crack(char *cipherText, cchar *alphabet)
 
         /* Determine shift of monoalphabetic cipher */
         int detShift = (ctChars[0] - dictChars[0]);
-
+        
         /* Apply shift and store in new string */
         char shiftedString[totColSz + 1];
         
@@ -342,25 +343,17 @@ void crack(char *cipherText, cchar *alphabet)
         /* Copy shifted column values to decrypted string */
         insertStringAtCol(shiftedString, clearText, col, ctLen, keyLengths[0]);
 
-        //printf("Shifted string (col %d):\n'%s' to: \n'%s' by value %d\n", col, colChars, shiftedString, detShift);
-
         /* Add a letter to the key string */
-        uint offset = alphabet[0];          //First char ascii code (65)
-        keyString[col] = offset + detShift;
+        uint offset = alphabet[0];
+
+        if(detShift < 0){
+            keyString[col] = (alphabet[strlen(alphabet) - 1]) + (detShift + 1);
+        }else{
+            keyString[col] = offset + detShift;
+        }
     }
 
     keyString[col] = '\0';
 
-    printf("\nKey(%d): '%s', Clear text: \n%s\n", strlen(keyString), keyString, clearText);
-}
-
-
-/* Main is just for testing now */
-int main(int argc, char **argv)
-{
-    cchar alphabet[] = "!\"#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~";
-
-    crack(argv[1], alphabet);
- 
-    return 0;
+    printf("\nKey(%li): '%s', Clear text: \n%s\n", strlen(keyString), keyString, clearText);
 }
