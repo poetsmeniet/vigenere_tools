@@ -40,13 +40,40 @@ void printBars(uint cnt)
         printf("-");
 }
 
+void printCharFreqs(charFreqs *freqChars, char *colChars)
+{
+    printf("Analyzing char frequencies.. of string\n");
+    cuint maxChars = 15;
+    uint printCnt = 0;
+    charFreqs *curr = freqChars;
+
+    while(curr->next != NULL){
+         int i;
+         for(i = 0; i < strlen(colChars); i++){
+             if(curr->letter == colChars[i]){
+                 float perc = (((float)curr->cnt / (float)strlen(colChars)) * 100.00);
+                 printf("%c(%d): %d (%f) ", curr->letter, curr->letter, curr->cnt, perc);
+                 printBars((uint)perc * 5);
+                 printf("\n");
+                 printCnt++;
+
+                 break;
+             }
+         }
+         curr = curr->next;
+
+         if(printCnt > maxChars)
+             break;
+    }
+    printf("\n");
+}
+
 /* Analyze frequency distribution of:
  * colChars STRING
  * outputs: array of most frequent chars
  * */
 void analyzeFrequencies(char * colChars, uint *keyLengths, char *dest)
 {
-    printf("\nAnalyzing frequencies of chars in string\n");
     /* Test frequency analysis */
     charFreqs *freqChars = malloc(sizeof(charFreqs));
     freqChars->next = NULL;
@@ -57,23 +84,8 @@ void analyzeFrequencies(char * colChars, uint *keyLengths, char *dest)
     /* Sort list */
     sortList(freqChars);
 
-    /* Read struct */
-    charFreqs *curr = freqChars;
-    while(curr->next != NULL){
-
-         int i;
-         for(i = 0; i < strlen(colChars); i++){
-             if(curr->letter == colChars[i]){
-                 float perc = (((float)curr->cnt / (float)strlen(colChars)) * 100.00);
-                 printf("%c(%d): %d (%f) ", curr->letter, curr->letter, curr->cnt, perc);
-                 printBars((uint)perc * 5);
-                 printf("\n");
-
-                 break;
-             }
-         }
-         curr = curr->next;
-    }
+    /* Read and print struct (debugging) */
+    printCharFreqs(freqChars, colChars);
 
     /* Set most frequent and second most frequent result 
      * Note: most naive code
@@ -130,10 +142,8 @@ extern void returnKeyLengths(char *cipherText, uint *keyLengths)
     printf("Cipher text: %s, len: %d\n", cipherText, len);
 
     /* This must be tweaked during testing */
-    uint maxLength = len / 4 + 1;
-     if(maxLength > 40)
-         maxLength = 40;
-
+    uint maxLength = len / 100;
+    
     /* For each key length starting from 4 to maxLength, 
      * look for repeated patterns */
     uint size;
@@ -163,7 +173,7 @@ extern void returnKeyLengths(char *cipherText, uint *keyLengths)
              *  3. store factors and their occurences */
             if(strcmp(w1, w2) == 0){
                 uint distance = ((w2Cnt + w1Cnt) - w1Cnt);
-                printf("Pattern: %s(%d) \t= %s. Size: %d\tdist: %d\t\n", w1, w1Cnt, w2, size, distance);
+                //printf("Pattern: %s(%d) \t= %s. Size: %d\tdist: %d\t\n", w1, w1Cnt, w2, size, distance);
 
                 getFactors(distance, freqNums);
             }
@@ -258,7 +268,7 @@ void applyShift(char *shiftedString,
         }
     
         if(shiftChar < offset){
-           shiftChar = ((shiftChar % offsEnd) + modulus) % offsEnd;
+            shiftChar = ((shiftChar % offsEnd) + modulus) % offsEnd;
         }
 
         if(shift == 1)
@@ -289,7 +299,8 @@ void devPrint(char *dictChars, char *ctChars)
  *   */
 extern void crackVig(char *cipherText, cchar *alphabet)
 {
-    /* Currently only interested in the two most likely key lengths */
+    /* Currently only interested in the two most likely key lengths 
+     * for determining shift of decomposed poyalphabetic cipher text*/
     uint keyLengths[2];
     keyLengths[0] = 0;
     keyLengths[1] = 0;
@@ -297,12 +308,15 @@ extern void crackVig(char *cipherText, cchar *alphabet)
     returnKeyLengths(cipherText, keyLengths);
 
     assert(keyLengths[0] > 0);
-    printf("Most likely key length: %d or: %d\n", keyLengths[0], keyLengths[1]);
 
     /* char array clearText will be filled with decrypted chars */
     const uint ctLen = strlen(cipherText);
     char clearText[ctLen];
     char keyString[keyLengths[0]];
+
+        /* Declare variable to store shift values of dictionary*/
+        char dictChars[] = {'\0', '\0'};
+        analyzeFrequencies(enDict, keyLengths, dictChars);
 
     /* Analyse frequency distribution of every nth column*/
     uint col;
@@ -322,12 +336,10 @@ extern void crackVig(char *cipherText, cchar *alphabet)
         
         colChars[totColSz - col] = '\0';
 
-        /* Declare variables to store shift values */
-        char dictChars[] = {'\0', '\0'};
+        /* Declare variable to store shift values of ciphertext */
         char ctChars[] = {'\0', '\0'};
 
-        /* compare with English dict */
-        analyzeFrequencies(enDict, keyLengths, dictChars);
+        /* Compare with English dict */
         analyzeFrequencies(colChars, keyLengths, ctChars);
 
         //devPrint(dictChars, ctChars);
