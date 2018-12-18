@@ -12,7 +12,7 @@ ifeq ($(DEBUG),YES)
 .PHONY: all clean docs
 
 all: $(CODE_FILES)
-		gcc -g -Wall -Warray-bounds=2 -o $(NAME) $(CODE_FILES)
+		gcc -g -Wall -Warray-bounds=2 -O3 -o $(NAME) $(CODE_FILES)
 		#gcc -g -Wall -Warray-bounds=2 -O3 -o a.out kasinskiexam.c generic.c
 
 #	clean:
