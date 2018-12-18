@@ -131,8 +131,8 @@ extern void returnKeyLengths(char *cipherText, uint *keyLengths)
 
     /* This must be tweaked during testing */
     uint maxLength = len / 4 + 1;
-     if(maxLength > 14)
-         maxLength = 14;
+     if(maxLength > 40)
+         maxLength = 40;
 
     /* For each key length starting from 4 to maxLength, 
      * look for repeated patterns */
@@ -163,7 +163,7 @@ extern void returnKeyLengths(char *cipherText, uint *keyLengths)
              *  3. store factors and their occurences */
             if(strcmp(w1, w2) == 0){
                 uint distance = ((w2Cnt + w1Cnt) - w1Cnt);
-                //printf("Pattern: %s(%d) \t= %s(%d). Size: %d\tdist: %d\t\n", w1, w1Cnt, w2, w2Offset, size, distance);
+                printf("Pattern: %s(%d) \t= %s. Size: %d\tdist: %d\t\n", w1, w1Cnt, w2, size, distance);
 
                 getFactors(distance, freqNums);
             }
@@ -222,6 +222,7 @@ void insertStringAtCol(char *src, char *dst, uint col, cuint len, uint keySz)
             dstCol = (i + col);
 
             /* Add colChars to appropriate column and make lower case */
+            assert(dstCol <= len);
             dst[dstCol] = src[k];
 
             j+=keySz;
@@ -302,7 +303,6 @@ extern void crackVig(char *cipherText, cchar *alphabet)
     const uint ctLen = strlen(cipherText);
     char clearText[ctLen];
     char keyString[keyLengths[0]];
-    clearText[ctLen] = '\0';
 
     /* Analyse frequency distribution of every nth column*/
     uint col;
@@ -347,13 +347,14 @@ extern void crackVig(char *cipherText, cchar *alphabet)
         uint offset = alphabet[0];
 
         if(detShift < 0){
-            keyString[col] = (alphabet[strlen(alphabet) - 1]) + (detShift + 1);
+            keyString[col] = ((alphabet[strlen(alphabet) - 1]) + (detShift + 1));
         }else{
             keyString[col] = offset + detShift;
         }
     }
 
     keyString[col] = '\0';
+    clearText[ctLen] = '\0';
 
     printf("\nKey(%li): '%s', Clear text: \n%s\n", strlen(keyString), keyString, clearText);
 }
