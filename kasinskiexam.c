@@ -142,7 +142,8 @@ extern void returnKeyLengths(char *cipherText, uint *keyLengths)
     printf("Cipher text: %s, len: %d\n", cipherText, len);
 
     /* This must be tweaked during testing */
-    uint maxLength = len / 100;
+    //uint maxLength = len / 100;
+    uint maxLength = 10;
     
     /* For each key length starting from 4 to maxLength, 
      * look for repeated patterns */
@@ -258,12 +259,15 @@ void applyShift(char *shiftedString,
     uint modulus = alphabet[0] - 1;     //First char ascii code - 1
     uint l;
 
+    assert(shift > 0);
+
+
     /* Apply shift to this column */
     for(l = 0; l < totColSz; l++){
         shiftChar = colChars[l] - (shift - aSz);
     
         /* Greater than Z -> modulo */
-        if(shiftChar >= offsEnd){
+        if(shiftChar > offsEnd){
             shiftChar = ((shiftChar % offsEnd) + modulus) % offsEnd;
         }
     
@@ -342,7 +346,7 @@ extern void crackVig(char *cipherText, cchar *alphabet)
         /* Compare with English dict */
         analyzeFrequencies(colChars, keyLengths, ctChars);
 
-        //devPrint(dictChars, ctChars);
+        devPrint(dictChars, ctChars);
 
         /* Determine shift of monoalphabetic cipher */
         int detShift = (ctChars[0] - dictChars[0]);
